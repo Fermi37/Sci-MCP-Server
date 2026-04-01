@@ -11,8 +11,8 @@ No dependency on the broken `scihub` PyPI package. Uses `requests` + `BeautifulS
 ## Features
 
 - **DOI Search** - Find papers by Digital Object Identifier
-- **Title Search** - Find papers by title (via CrossRef API + Sci-Hub)
-- **Keyword Search** - Discover papers related to a research topic
+- **Title Search** - Find papers by title via Crossref candidate lookup followed by Sci-Hub resolution
+- **Keyword Search** - Discover papers related to a research topic via Crossref search and Sci-Hub validation
 - **PDF Download** - Download full-text PDFs with basic response validation
 - **Metadata Retrieval** - Get paper metadata by DOI
 - **Auto Mirror Failover** - Tries multiple Sci-Hub mirrors automatically
@@ -105,6 +105,8 @@ Add to your `claude_desktop_config.json`:
 | `download_scihub_pdf` | Download a paper PDF from a URL |
 | `get_paper_metadata` | Get metadata for a paper by DOI |
 
+Title and keyword search results depend on current Crossref ranking and Sci-Hub mirror availability. Some well-known titles may therefore return `not_found` even when DOI lookup succeeds.
+
 ## Examples
 
 Once connected to an AI assistant, you can use natural language:
@@ -114,11 +116,11 @@ Search for the paper with DOI 10.1109/TSMC.2016.2597800
 ```
 
 ```
-Find the paper titled "Attention Is All You Need"
+Find the paper titled "Efficient Solutions for Discreteness, Drift, and Disturbance (3D) in Electronic Olfaction"
 ```
 
 ```
-Search for recent papers about reinforcement learning
+Search for papers about reinforcement learning
 ```
 
 ```
@@ -139,7 +141,7 @@ Run the live MCP smoke test suite:
 SCIHUB_LIVE_TESTS=1 UV_CACHE_DIR=.uv-cache uv run pytest -q tests/test_mcp_smoke.py
 ```
 
-The live smoke suite checks the MCP stdio lifecycle, `tools/list`, DOI search, title search, and PDF download. It requires network access and working Sci-Hub mirrors.
+The live smoke suite checks the MCP stdio lifecycle, `tools/list`, DOI search, title search, keyword search, metadata retrieval, and PDF download. It requires network access and working Sci-Hub mirrors.
 
 GitHub Actions policy:
 
