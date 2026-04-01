@@ -22,6 +22,7 @@ git status --short --branch
 ```
 
 The working tree must be clean before tagging.
+The live smoke suite validates `tools/list`, DOI search, metadata retrieval, and PDF download.
 
 ## Tag and Push
 
@@ -47,8 +48,8 @@ If the GitHub release is created in the web UI, copy the `0.2.0` section from [C
 
 1. Confirm [pyproject.toml](./pyproject.toml) version matches the planned tag.
 2. Confirm [README.md](./README.md) and [README_CN.md](./README_CN.md) match the runtime requirement.
-3. Run the offline test suite.
-4. Run the live MCP smoke test suite.
+3. Run the offline test suite, including the offline MCP tool inventory regression.
+4. Run the live MCP smoke test suite for DOI search, metadata retrieval, and PDF download.
 5. Confirm `git status --short --branch` is clean.
 6. Create and push the annotated tag.
 7. Publish the GitHub release with the notes from [CHANGELOG.md](./CHANGELOG.md).

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- Removed the public MCP tools `search_scihub_by_title` and `search_scihub_by_keyword`.
+
+### Changed
+
+- Reduced smoke and regression coverage to the supported tool surface: DOI search, metadata retrieval, and PDF download.
+
 ## 0.2.0
 
 ### Added
