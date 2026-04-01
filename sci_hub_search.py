@@ -5,7 +5,6 @@ import re
 import tempfile
 import urllib3
 from dataclasses import asdict, dataclass
-from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Iterable
 from urllib.parse import urljoin
@@ -17,7 +16,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 CROSSREF_WORKS_URL = "https://api.crossref.org/works"
-MIN_TITLE_SCORE = 0.72
 SCIHUB_LOOKUP_TIMEOUT = 10
 PDF_SIGNATURE = b"%PDF"
 
@@ -71,16 +69,6 @@ def _create_session() -> requests.Session:
 
 def _normalize_space(value: str) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
-
-
-def _looks_like_doi(value: str) -> bool:
-    return bool(re.match(r"^10\.\S+/\S+$", (value or "").strip(), re.IGNORECASE))
-
-
-def _normalize_title_for_match(value: str) -> str:
-    value = _normalize_space(value).casefold()
-    value = re.sub(r"[^a-z0-9]+", " ", value)
-    return _normalize_space(value)
 
 
 def _clean_title(value: str) -> str:
@@ -298,33 +286,6 @@ def _fetch_crossref_work(doi: str) -> PaperRecord:
     return _record_from_crossref_item(item, doi_hint=doi)
 
 
-def _search_crossref_candidates(title: str, rows: int = 5) -> list[dict]:
-    response = requests.get(
-        CROSSREF_WORKS_URL,
-        params={"query.title": title, "rows": rows},
-        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
-        timeout=15,
-    )
-    response.raise_for_status()
-    return response.json().get("message", {}).get("items", [])
-
-
-def _score_title_match(query_title: str, candidate_title: str) -> float:
-    query_normalized = _normalize_title_for_match(query_title)
-    candidate_normalized = _normalize_title_for_match(candidate_title)
-    if not query_normalized or not candidate_normalized:
-        return 0.0
-    if query_normalized == candidate_normalized:
-        return 1.0
-
-    query_tokens = set(query_normalized.split())
-    candidate_tokens = set(candidate_normalized.split())
-    overlap = len(query_tokens & candidate_tokens) / max(len(query_tokens), 1)
-    ratio = SequenceMatcher(None, query_normalized, candidate_normalized).ratio()
-    prefix_bonus = 0.05 if candidate_normalized.startswith(query_normalized) else 0.0
-    return min(1.0, 0.65 * ratio + 0.30 * overlap + prefix_bonus)
-
-
 def _enrich_from_crossref(record: PaperRecord) -> PaperRecord:
     if not record.doi or (record.title and record.author and record.year):
         return record
@@ -359,50 +320,6 @@ def search_paper_by_doi(doi: str) -> dict[str, str]:
         record.status = "success"
         return record.to_dict()
     return {"doi": doi, "status": "not_found"}
-
-
-def search_paper_by_title(title: str) -> dict[str, str]:
-    try:
-        ranked_items: list[tuple[float, dict]] = []
-        for item in _search_crossref_candidates(title, rows=5):
-            candidate_titles = item.get("title", []) or []
-            score = _score_title_match(title, candidate_titles[0] if candidate_titles else "")
-            if score >= MIN_TITLE_SCORE:
-                ranked_items.append((score, item))
-
-        for _, item in sorted(ranked_items, key=lambda entry: entry[0], reverse=True):
-            doi = item.get("DOI", "")
-            if doi:
-                result = search_paper_by_doi(doi)
-                if result.get("status") == "success":
-                    if not result.get("title"):
-                        result["title"] = _normalize_space((item.get("title", []) or [""])[0])
-                    return result
-    except Exception as exc:
-        print(f"CrossRef search error: {exc}")
-    return {"title": title, "status": "not_found"}
-
-
-def search_papers_by_keyword(keyword: str, num_results: int = 10) -> list[dict[str, str]]:
-    papers: list[dict[str, str]] = []
-    try:
-        response = requests.get(
-            CROSSREF_WORKS_URL,
-            params={"query": keyword, "rows": num_results},
-            headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
-            timeout=15,
-        )
-        response.raise_for_status()
-        for item in response.json().get("message", {}).get("items", []):
-            doi = item.get("DOI")
-            if not doi:
-                continue
-            result = search_paper_by_doi(doi)
-            if result.get("status") == "success":
-                papers.append(result)
-    except Exception as exc:
-        print(f"Search error: {exc}")
-    return papers
 
 
 def _candidate_download_url(pdf_url: str) -> str:
