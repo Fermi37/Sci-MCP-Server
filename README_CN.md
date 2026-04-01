@@ -7,8 +7,6 @@
 ## 功能
 
 - **DOI 搜索** — 通过数字对象标识符查找论文
-- **标题搜索** — 先通过 Crossref 候选结果检索标题，再通过 Sci-Hub 解析论文
-- **关键词搜索** — 先通过 Crossref 进行主题检索，再由 Sci-Hub 校验可用结果
 - **PDF 下载** — 下载论文全文 PDF，并进行基础响应校验
 - **元数据获取** — 通过 DOI 获取论文元数据
 - **镜像自动切换** — 依次尝试多个 Sci-Hub 镜像，使用第一个可用的
@@ -96,12 +94,8 @@ uv run python sci_hub_server.py
 | 工具名 | 说明 |
 |--------|------|
 | `search_scihub_by_doi` | 通过 DOI 搜索论文 |
-| `search_scihub_by_title` | 通过标题搜索论文 |
-| `search_scihub_by_keyword` | 通过关键词搜索论文 |
 | `download_scihub_pdf` | 从 URL 下载论文 PDF |
 | `get_paper_metadata` | 通过 DOI 获取论文元数据 |
-
-标题搜索和关键词搜索的结果依赖当前的 Crossref 排序以及 Sci-Hub 镜像可用性。因此，即使 DOI 检索能够成功，某些知名论文标题仍可能返回 `not_found`。
 
 ## 使用示例
 
@@ -109,14 +103,6 @@ uv run python sci_hub_server.py
 
 ```
 帮我搜索 DOI 为 10.1109/TSMC.2016.2597800 的论文
-```
-
-```
-查找标题为 "Efficient Solutions for Discreteness, Drift, and Disturbance (3D) in Electronic Olfaction" 的论文
-```
-
-```
-搜索关于强化学习的论文
 ```
 
 ```
@@ -137,7 +123,7 @@ UV_CACHE_DIR=.uv-cache uv run pytest -q
 SCIHUB_LIVE_TESTS=1 UV_CACHE_DIR=.uv-cache uv run pytest -q tests/test_mcp_smoke.py
 ```
 
-在线 smoke tests 会检查 MCP stdio 生命周期、`tools/list`、DOI 搜索、标题搜索、关键词搜索、元数据获取和 PDF 下载。该测试需要网络访问以及可用的 Sci-Hub 镜像。
+在线 smoke tests 会检查 MCP stdio 生命周期、`tools/list`、DOI 搜索、元数据获取和 PDF 下载。该测试需要网络访问以及可用的 Sci-Hub 镜像。
 
 GitHub Actions 策略：
 

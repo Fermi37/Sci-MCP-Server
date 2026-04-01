@@ -33,13 +33,11 @@ def test_mcp_stdio_smoke(tmp_path: Path):
 
                 tools_result = await session.list_tools()
                 tool_names = {tool.name for tool in tools_result.tools}
-                assert {
+                assert tool_names == {
                     "search_scihub_by_doi",
-                    "search_scihub_by_title",
-                    "search_scihub_by_keyword",
                     "download_scihub_pdf",
                     "get_paper_metadata",
-                }.issubset(tool_names)
+                }
 
                 doi_result = await session.call_tool(
                     "search_scihub_by_doi",
@@ -51,31 +49,6 @@ def test_mcp_stdio_smoke(tmp_path: Path):
                 assert doi_payload["title"]
                 assert doi_payload["year"]
                 assert doi_payload["pdf_url"]
-
-                title_result = await session.call_tool(
-                    "search_scihub_by_title",
-                    {
-                        "title": "Efficient Solutions for Discreteness, Drift, and Disturbance (3D) in Electronic Olfaction"
-                    },
-                )
-                title_payload = title_result.structuredContent["result"]
-                assert title_result.isError is False
-                assert title_payload["status"] == "success"
-                assert title_payload["title"]
-                assert title_payload["pdf_url"]
-
-                keyword_result = await session.call_tool(
-                    "search_scihub_by_keyword",
-                    {"keyword": "reinforcement learning", "num_results": 3},
-                )
-                keyword_payload = keyword_result.structuredContent["result"]
-                assert keyword_result.isError is False
-                assert isinstance(keyword_payload, list)
-                assert keyword_payload
-                assert keyword_payload[0]["status"] == "success"
-                assert keyword_payload[0]["doi"]
-                assert keyword_payload[0]["title"]
-                assert keyword_payload[0]["pdf_url"]
 
                 metadata_result = await session.call_tool(
                     "get_paper_metadata",
