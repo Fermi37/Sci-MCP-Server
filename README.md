@@ -19,7 +19,7 @@ No dependency on the broken `scihub` PyPI package. Uses `requests` + `BeautifulS
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.14+
 - pip
 
 ## Installation
