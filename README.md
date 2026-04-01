@@ -44,6 +44,12 @@ python sci_hub_search.py
 python sci_hub_server.py
 ```
 
+With `uv`, use:
+
+```bash
+uv run python sci_hub_server.py
+```
+
 ### Configure with Claude Code
 
 Add to your `~/.mcp.json`:
@@ -83,7 +89,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "scihub": {
       "command": "python",
-      "args": ["-m", "sci_hub_server.py"]
+      "args": ["path/to/Sci-Hub-MCP-Server/sci_hub_server.py"]
     }
   }
 }

@@ -40,6 +40,12 @@ python sci_hub_search.py
 python sci_hub_server.py
 ```
 
+如果使用 `uv`，可执行：
+
+```bash
+uv run python sci_hub_server.py
+```
+
 ### 在 Claude Code 中配置
 
 在 `~/.mcp.json` 中添加：
@@ -79,7 +85,7 @@ python sci_hub_server.py
   "mcpServers": {
     "scihub": {
       "command": "python",
-      "args": ["-m", "sci_hub_server.py"]
+      "args": ["你的路径/Sci-Hub-MCP-Server/sci_hub_server.py"]
     }
   }
 }
