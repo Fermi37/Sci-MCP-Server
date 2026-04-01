@@ -126,7 +126,7 @@ uv run python sci_hub_server.py
 运行离线回归测试：
 
 ```bash
-uv run pytest -q
+UV_CACHE_DIR=.uv-cache uv run pytest -q
 ```
 
 运行 MCP 在线 smoke tests：
@@ -136,6 +136,11 @@ SCIHUB_LIVE_TESTS=1 UV_CACHE_DIR=.uv-cache uv run pytest -q tests/test_mcp_smoke
 ```
 
 在线 smoke tests 会检查 MCP stdio 生命周期、`tools/list`、DOI 搜索、标题搜索和 PDF 下载。该测试需要网络访问以及可用的 Sci-Hub 镜像。
+
+GitHub Actions 策略：
+
+- `.github/workflows/ci.yml` 是必须通过的离线校验工作流。
+- `.github/workflows/live-smoke.yml` 是用于发版检查的非阻塞在线 smoke workflow。
 
 ## 更新镜像
 

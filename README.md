@@ -130,7 +130,7 @@ Download the PDF to my_paper.pdf
 Run the offline regression suite:
 
 ```bash
-uv run pytest -q
+UV_CACHE_DIR=.uv-cache uv run pytest -q
 ```
 
 Run the live MCP smoke test suite:
@@ -140,6 +140,11 @@ SCIHUB_LIVE_TESTS=1 UV_CACHE_DIR=.uv-cache uv run pytest -q tests/test_mcp_smoke
 ```
 
 The live smoke suite checks the MCP stdio lifecycle, `tools/list`, DOI search, title search, and PDF download. It requires network access and working Sci-Hub mirrors.
+
+GitHub Actions policy:
+
+- `.github/workflows/ci.yml` is the required offline validation workflow.
+- `.github/workflows/live-smoke.yml` is the non-blocking live smoke workflow for release checks.
 
 ## Updating Mirrors
 
