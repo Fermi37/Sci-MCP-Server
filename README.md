@@ -13,7 +13,7 @@ No dependency on the broken `scihub` PyPI package. Uses `requests` + `BeautifulS
 - **DOI Search** - Find papers by Digital Object Identifier
 - **Title Search** - Find papers by title (via CrossRef API + Sci-Hub)
 - **Keyword Search** - Discover papers related to a research topic
-- **PDF Download** - Download full-text PDFs
+- **PDF Download** - Download full-text PDFs with basic response validation
 - **Metadata Retrieval** - Get paper metadata by DOI
 - **Auto Mirror Failover** - Tries multiple Sci-Hub mirrors automatically
 
@@ -124,6 +124,22 @@ Search for recent papers about reinforcement learning
 ```
 Download the PDF to my_paper.pdf
 ```
+
+## Testing
+
+Run the offline regression suite:
+
+```bash
+uv run pytest -q
+```
+
+Run the live MCP smoke test suite:
+
+```bash
+SCIHUB_LIVE_TESTS=1 UV_CACHE_DIR=.uv-cache uv run pytest -q tests/test_mcp_smoke.py
+```
+
+The live smoke suite checks the MCP stdio lifecycle, `tools/list`, DOI search, title search, and PDF download. It requires network access and working Sci-Hub mirrors.
 
 ## Updating Mirrors
 

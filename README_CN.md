@@ -9,7 +9,7 @@
 - **DOI 搜索** — 通过数字对象标识符查找论文
 - **标题搜索** — 通过论文标题查找（经由 CrossRef API + Sci-Hub）
 - **关键词搜索** — 按研究主题发现相关论文
-- **PDF 下载** — 下载论文全文 PDF
+- **PDF 下载** — 下载论文全文 PDF，并进行基础响应校验
 - **元数据获取** — 通过 DOI 获取论文元数据
 - **镜像自动切换** — 依次尝试多个 Sci-Hub 镜像，使用第一个可用的
 
@@ -120,6 +120,22 @@ uv run python sci_hub_server.py
 ```
 把这篇论文的 PDF 下载到 my_paper.pdf
 ```
+
+## 测试
+
+运行离线回归测试：
+
+```bash
+uv run pytest -q
+```
+
+运行 MCP 在线 smoke tests：
+
+```bash
+SCIHUB_LIVE_TESTS=1 UV_CACHE_DIR=.uv-cache uv run pytest -q tests/test_mcp_smoke.py
+```
+
+在线 smoke tests 会检查 MCP stdio 生命周期、`tools/list`、DOI 搜索、标题搜索和 PDF 下载。该测试需要网络访问以及可用的 Sci-Hub 镜像。
 
 ## 更新镜像
 

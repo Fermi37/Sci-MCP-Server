@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+import tempfile
 import urllib3
 from dataclasses import asdict, dataclass
 from difflib import SequenceMatcher
@@ -17,6 +19,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 CROSSREF_WORKS_URL = "https://api.crossref.org/works"
 MIN_TITLE_SCORE = 0.72
 SCIHUB_LOOKUP_TIMEOUT = 10
+PDF_SIGNATURE = b"%PDF"
 
 SCIHUB_MIRRORS = [
     "https://sci-hub.hkvisa.net",
@@ -409,22 +412,73 @@ def _candidate_download_url(pdf_url: str) -> str:
     return f"{pdf_url}{separator}download=true"
 
 
+def _is_valid_pdf_response(response: requests.Response, first_chunk: bytes, written_bytes: int) -> bool:
+    content_type = (response.headers.get("content-type") or "").casefold()
+    content_length = response.headers.get("content-length")
+
+    if content_length is not None:
+        try:
+            if int(content_length) <= 0:
+                return False
+        except ValueError:
+            return False
+
+    if written_bytes <= 0 or not first_chunk.startswith(PDF_SIGNATURE):
+        return False
+
+    if not content_type:
+        return True
+    if "application/pdf" in content_type:
+        return True
+    if "application/octet-stream" in content_type and first_chunk.startswith(PDF_SIGNATURE):
+        return True
+    return False
+
+
 def download_paper(pdf_url: str, output_path: str) -> bool:
     session = _create_session()
     download_url = _candidate_download_url(pdf_url)
     target_path = Path(output_path)
     target_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_file = None
+    temp_path = None
     try:
         response = session.get(download_url, timeout=60, stream=True)
-        if response.status_code == 200:
-            with target_path.open("wb") as file_handle:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        file_handle.write(chunk)
-            return True
+        if response.status_code != 200:
+            return False
+
+        temp_file = tempfile.NamedTemporaryFile(delete=False, dir=str(target_path.parent))
+        temp_path = Path(temp_file.name)
+        first_chunk = b""
+        written_bytes = 0
+        for chunk in response.iter_content(chunk_size=8192):
+            if not chunk:
+                continue
+            if not first_chunk:
+                first_chunk = chunk
+            temp_file.write(chunk)
+            written_bytes += len(chunk)
+        temp_file.close()
+        temp_file = None
+
+        if not _is_valid_pdf_response(response, first_chunk, written_bytes):
+            if temp_path.exists():
+                temp_path.unlink()
+            return False
+        if temp_path.stat().st_size <= 0:
+            temp_path.unlink()
+            return False
+
+        os.replace(temp_path, target_path)
+        return True
     except Exception as exc:
         print(f"Download error: {exc}")
         return False
+    finally:
+        if temp_file is not None:
+            temp_file.close()
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink(missing_ok=True)
     return False
 
 
