@@ -64,6 +64,31 @@ def test_mcp_stdio_smoke(tmp_path: Path):
                 assert title_payload["title"]
                 assert title_payload["pdf_url"]
 
+                keyword_result = await session.call_tool(
+                    "search_scihub_by_keyword",
+                    {"keyword": "reinforcement learning", "num_results": 3},
+                )
+                keyword_payload = keyword_result.structuredContent["result"]
+                assert keyword_result.isError is False
+                assert isinstance(keyword_payload, list)
+                assert keyword_payload
+                assert keyword_payload[0]["status"] == "success"
+                assert keyword_payload[0]["doi"]
+                assert keyword_payload[0]["title"]
+                assert keyword_payload[0]["pdf_url"]
+
+                metadata_result = await session.call_tool(
+                    "get_paper_metadata",
+                    {"doi": "10.1109/TSMC.2016.2597800"},
+                )
+                metadata_payload = metadata_result.structuredContent["result"]
+                assert metadata_result.isError is False
+                assert metadata_payload["status"] == "success"
+                assert metadata_payload["doi"] == "10.1109/TSMC.2016.2597800"
+                assert metadata_payload["title"]
+                assert metadata_payload["year"]
+                assert metadata_payload["pdf_url"]
+
                 download_result = await session.call_tool(
                     "download_scihub_pdf",
                     {"pdf_url": doi_payload["pdf_url"], "output_path": str(output_path)},
