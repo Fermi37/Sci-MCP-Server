@@ -5,8 +5,8 @@ This repository currently uses GitHub source releases.
 ## Release Inputs
 
 - Release branch: `develop`
-- Release version: `0.2.0`
-- Release tag: `v0.2.0`
+- Release version: `0.3.0`
+- Release tag: `v0.3.0`
 - Release notes source: [CHANGELOG.md](./CHANGELOG.md)
 
 ## Pre-release Validation
@@ -27,9 +27,9 @@ The live smoke suite validates `tools/list`, DOI search, metadata retrieval, and
 ## Tag and Push
 
 ```bash
-git tag -a v0.2.0 -m "Release v0.2.0"
+git tag -a v0.3.0 -m "Release v0.3.0"
 git push origin develop
-git push origin v0.2.0
+git push origin v0.3.0
 ```
 
 ## Create GitHub Release
@@ -37,12 +37,12 @@ git push origin v0.2.0
 If `gh` is available:
 
 ```bash
-gh release create v0.2.0 \
-  --title "v0.2.0" \
+gh release create v0.3.0 \
+  --title "v0.3.0" \
   --notes-file CHANGELOG.md
 ```
 
-If the GitHub release is created in the web UI, copy the `0.2.0` section from [CHANGELOG.md](./CHANGELOG.md).
+If the GitHub release is created in the web UI, copy the `0.3.0` section from [CHANGELOG.md](./CHANGELOG.md).
 
 ## Release Checklist
 
