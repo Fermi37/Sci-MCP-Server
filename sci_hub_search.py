@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import urllib3
 from dataclasses import asdict, dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Iterable
 from urllib.parse import urljoin
@@ -14,6 +15,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 CROSSREF_WORKS_URL = "https://api.crossref.org/works"
+MIN_TITLE_SCORE = 0.72
+SCIHUB_LOOKUP_TIMEOUT = 10
 
 SCIHUB_MIRRORS = [
     "https://sci-hub.hkvisa.net",
@@ -69,6 +72,12 @@ def _normalize_space(value: str) -> str:
 
 def _looks_like_doi(value: str) -> bool:
     return bool(re.match(r"^10\.\S+/\S+$", (value or "").strip(), re.IGNORECASE))
+
+
+def _normalize_title_for_match(value: str) -> str:
+    value = _normalize_space(value).casefold()
+    value = re.sub(r"[^a-z0-9]+", " ", value)
+    return _normalize_space(value)
 
 
 def _clean_title(value: str) -> str:
@@ -297,6 +306,22 @@ def _search_crossref_candidates(title: str, rows: int = 5) -> list[dict]:
     return response.json().get("message", {}).get("items", [])
 
 
+def _score_title_match(query_title: str, candidate_title: str) -> float:
+    query_normalized = _normalize_title_for_match(query_title)
+    candidate_normalized = _normalize_title_for_match(candidate_title)
+    if not query_normalized or not candidate_normalized:
+        return 0.0
+    if query_normalized == candidate_normalized:
+        return 1.0
+
+    query_tokens = set(query_normalized.split())
+    candidate_tokens = set(candidate_normalized.split())
+    overlap = len(query_tokens & candidate_tokens) / max(len(query_tokens), 1)
+    ratio = SequenceMatcher(None, query_normalized, candidate_normalized).ratio()
+    prefix_bonus = 0.05 if candidate_normalized.startswith(query_normalized) else 0.0
+    return min(1.0, 0.65 * ratio + 0.30 * overlap + prefix_bonus)
+
+
 def _enrich_from_crossref(record: PaperRecord) -> PaperRecord:
     if not record.doi or (record.title and record.author and record.year):
         return record
@@ -314,7 +339,7 @@ def _fetch_from_scihub(identifier: str, doi_hint: str = "") -> PaperRecord:
     for mirror in SCIHUB_MIRRORS:
         try:
             url = f"{mirror}/{identifier}"
-            response = session.get(url, timeout=30, allow_redirects=True)
+            response = session.get(url, timeout=SCIHUB_LOOKUP_TIMEOUT, allow_redirects=True)
             if response.status_code != 200 or len(response.text) <= 1000:
                 continue
             record = _extract_record_from_html(response.text, mirror, doi_hint=doi_hint or identifier)
@@ -335,12 +360,20 @@ def search_paper_by_doi(doi: str) -> dict[str, str]:
 
 def search_paper_by_title(title: str) -> dict[str, str]:
     try:
-        items = _search_crossref_candidates(title, rows=1)
-        if items:
-            doi = items[0].get("DOI", "")
+        ranked_items: list[tuple[float, dict]] = []
+        for item in _search_crossref_candidates(title, rows=5):
+            candidate_titles = item.get("title", []) or []
+            score = _score_title_match(title, candidate_titles[0] if candidate_titles else "")
+            if score >= MIN_TITLE_SCORE:
+                ranked_items.append((score, item))
+
+        for _, item in sorted(ranked_items, key=lambda entry: entry[0], reverse=True):
+            doi = item.get("DOI", "")
             if doi:
                 result = search_paper_by_doi(doi)
                 if result.get("status") == "success":
+                    if not result.get("title"):
+                        result["title"] = _normalize_space((item.get("title", []) or [""])[0])
                     return result
     except Exception as exc:
         print(f"CrossRef search error: {exc}")
