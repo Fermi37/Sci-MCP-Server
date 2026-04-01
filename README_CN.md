@@ -1,6 +1,6 @@
-# Sci-Hub MCP Server
+# Sci MCP Server
 
-一个基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的服务器，让 AI 助手能够通过 Sci-Hub 搜索和下载学术论文。
+一个基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的服务器，用于学术论文检索工作流。当前实现包含基于 Sci-Hub 的搜索与下载工具。
 
 不依赖 PyPI 上已损坏的 `scihub` 包，使用 `requests` + `BeautifulSoup` 直接解析 Sci-Hub 镜像页面，支持多镜像自动切换。
 
@@ -21,8 +21,8 @@
 ## 安装
 
 ```bash
-git clone https://github.com/CyberKrypton/Sci-Hub-MCP-Server.git
-cd Sci-Hub-MCP-Server
+git clone https://github.com/Fermi37/Sci-MCP-Server.git
+cd Sci-MCP-Server
 pip install -r requirements.txt
 ```
 
@@ -55,7 +55,7 @@ uv run python sci_hub_server.py
   "mcpServers": {
     "scihub": {
       "command": "python",
-      "args": ["你的路径/Sci-Hub-MCP-Server/sci_hub_server.py"]
+      "args": ["你的路径/Sci-MCP-Server/sci_hub_server.py"]
     }
   }
 }
@@ -69,7 +69,7 @@ uv run python sci_hub_server.py
     "scihub": {
       "command": "C:\\Users\\你的用户名\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
       "args": [
-        "C:\\Users\\你的用户名\\Sci-Hub-MCP-Server\\sci_hub_server.py"
+        "C:\\Users\\你的用户名\\Sci-MCP-Server\\sci_hub_server.py"
       ]
     }
   }
@@ -85,7 +85,7 @@ uv run python sci_hub_server.py
   "mcpServers": {
     "scihub": {
       "command": "python",
-      "args": ["你的路径/Sci-Hub-MCP-Server/sci_hub_server.py"]
+      "args": ["你的路径/Sci-MCP-Server/sci_hub_server.py"]
     }
   }
 }
@@ -162,7 +162,7 @@ SCIHUB_MIRRORS = [
 ## 项目结构
 
 ```
-Sci-Hub-MCP-Server/
+Sci-MCP-Server/
   sci_hub_server.py      # MCP 服务器入口（FastMCP）
   sci_hub_search.py      # 核心搜索与下载逻辑
   requirements.txt       # Python 依赖

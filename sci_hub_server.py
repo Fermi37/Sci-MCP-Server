@@ -156,6 +156,6 @@ async def get_paper_metadata(doi: str) -> Dict[str, Any]:
         return {"error": f"An error occurred while getting metadata: {str(e)}"}
 
 if __name__ == "__main__":
-    logging.info("Starting Sci-Hub MCP Server")
+    logging.info("Starting Sci MCP Server")
     # Initialize and run the server
     mcp.run(transport='stdio')

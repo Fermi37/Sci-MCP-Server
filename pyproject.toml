@@ -1,7 +1,7 @@
 [project]
 name = "sci-mcp-server"
 version = "0.2.0"
-description = "MCP server for searching and downloading academic papers through Sci-Hub mirrors"
+description = "MCP server for academic paper retrieval workflows, including Sci-Hub-backed search and download"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

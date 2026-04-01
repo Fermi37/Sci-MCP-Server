@@ -2,9 +2,9 @@
   <a href="./README.md">English</a> | <a href="./README_CN.md">简体中文</a>
 </p>
 
-# Sci-Hub MCP Server
+# Sci MCP Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that enables AI assistants to search and download academic papers from Sci-Hub.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for academic paper retrieval workflows. The current implementation includes Sci-Hub-backed search and download tools.
 
 No dependency on the broken `scihub` PyPI package. Uses `requests` + `BeautifulSoup` to directly parse Sci-Hub mirror pages, with automatic mirror failover.
 
@@ -25,8 +25,8 @@ No dependency on the broken `scihub` PyPI package. Uses `requests` + `BeautifulS
 ## Installation
 
 ```bash
-git clone https://github.com/CyberKrypton/Sci-Hub-MCP-Server.git
-cd Sci-Hub-MCP-Server
+git clone https://github.com/Fermi37/Sci-MCP-Server.git
+cd Sci-MCP-Server
 pip install -r requirements.txt
 ```
 
@@ -59,7 +59,7 @@ Add to your `~/.mcp.json`:
   "mcpServers": {
     "scihub": {
       "command": "python",
-      "args": ["path/to/Sci-Hub-MCP-Server/sci_hub_server.py"]
+      "args": ["path/to/Sci-MCP-Server/sci_hub_server.py"]
     }
   }
 }
@@ -73,7 +73,7 @@ Add to your `~/.mcp.json`:
     "scihub": {
       "command": "C:\\Users\\YOUR_USER\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
       "args": [
-        "C:\\Users\\YOUR_USER\\Sci-Hub-MCP-Server\\sci_hub_server.py"
+        "C:\\Users\\YOUR_USER\\Sci-MCP-Server\\sci_hub_server.py"
       ]
     }
   }
@@ -89,7 +89,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "scihub": {
       "command": "python",
-      "args": ["path/to/Sci-Hub-MCP-Server/sci_hub_server.py"]
+      "args": ["path/to/Sci-MCP-Server/sci_hub_server.py"]
     }
   }
 }
@@ -166,7 +166,7 @@ The server tries each mirror in order and uses the first one that returns a vali
 ## Project Structure
 
 ```
-Sci-Hub-MCP-Server/
+Sci-MCP-Server/
   sci_hub_server.py      # MCP server (FastMCP entry point)
   sci_hub_search.py      # Core search & download logic
   requirements.txt       # Python dependencies
